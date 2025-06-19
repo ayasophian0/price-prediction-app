@@ -5,28 +5,38 @@ import pickle
 import base64
 import time
 
+# Load models and encoders
 encoder = pickle.load(open('encoder', 'rb'))
 scaler = pickle.load(open('scaler', 'rb'))
 model = pickle.load(open('xgb_final_model', 'rb'))
 
+# App title and intro
 st.write("""
-         # Welcome to the Ultimate Car Price Predictor Machine!
-         
-         Let's play with the widgets in the slidebar 
-         and then click on the button below to get the price of your dream car!
-         """)
+    # 🚗 Welcome to the Ultimate Car Price Predictor Machine! 🪄
+    
+    Play with the widgets in the sidebar  
+    and click the magic button below to reveal the price of your dream car!
+""")
 
-st.sidebar.header('This is where your inputs go!')
+# Sidebar
+st.sidebar.header('🔧 Your Car Settings')
 
+# User input function
 def user_input_features():
-    make_model = st.sidebar.selectbox('Make and Model', ('SEAT Leon', 'Renault Megane', 'Ford Mustang', 'Hyundai i30',
-       'Ford Focus', 'Peugeot 308', 'Opel Astra', 'Dacia Sandero',
-       'Nissan Qashqai', 'Fiat 500', 'Ford Fiesta', 'Skoda Octavia',
-       'Renault Clio', 'Fiat 500X', 'Fiat Tipo', 'Opel Corsa', 'SEAT Ibiza',
-       'Dacia Duster', 'Opel Insignia', 'Peugeot 208'))
-    body_type = st.sidebar.selectbox('Body Type', ('Sedan', 'Station wagon', 'Compact', 'Coupe', 'Off-Road/Pick-up',
-       'Convertible'))
-    Type = st.sidebar.selectbox('Type', ('Used', 'Pre-registered', 'Demonstration', "Employee's car"))
+    make_model = st.sidebar.selectbox('Make and Model', (
+        'SEAT Leon', 'Renault Megane', 'Ford Mustang', 'Hyundai i30',
+        'Ford Focus', 'Peugeot 308', 'Opel Astra', 'Dacia Sandero',
+        'Nissan Qashqai', 'Fiat 500', 'Ford Fiesta', 'Skoda Octavia',
+        'Renault Clio', 'Fiat 500X', 'Fiat Tipo', 'Opel Corsa', 'SEAT Ibiza',
+        'Dacia Duster', 'Opel Insignia', 'Peugeot 208'))
+    
+    body_type = st.sidebar.selectbox('Body Type', (
+        'Sedan', 'Station wagon', 'Compact', 'Coupe', 'Off-Road/Pick-up',
+        'Convertible'))
+    
+    Type = st.sidebar.selectbox('Type', (
+        'Used', 'Pre-registered', 'Demonstration', "Employee's car"))
+    
     mileage = st.sidebar.slider('Mileage (in km)', 0, 330000, 50000)
     Gearbox = st.sidebar.radio('Gearbox', ('Automatic', 'Manual', 'Semi-automatic'))
     fuel_type = st.sidebar.selectbox('Fuel', ('Benzine', 'Diesel', 'Other', 'Hybrid', 'LPG', 'Electric'))
@@ -39,19 +49,34 @@ def user_input_features():
     fuel_consumption = st.sidebar.slider('Fuel Consumption (in L/100km)', 0.0, 20.0, 5.0)
     age = st.sidebar.slider('Age (in years)', 0, 30, 5)
 
-    data = {'make_model': make_model, 'body_type': body_type, 'type': Type, 'mileage': mileage,
-            'gearbox': Gearbox, 'fuel_type': fuel_type, 'paint': paint,
-            'drivetrain': drivetrain, 'empty_weight': empty_weight, 'upholstery': upholstery,
-            'horsepower': horsepower, 'engine_size': engine_size,
-            'fuel_consumption': fuel_consumption, 'age': age
-            }
+    data = {
+        'make_model': make_model,
+        'body_type': body_type,
+        'type': Type,
+        'mileage': mileage,
+        'gearbox': Gearbox,
+        'fuel_type': fuel_type,
+        'paint': paint,
+        'drivetrain': drivetrain,
+        'empty_weight': empty_weight,
+        'upholstery': upholstery,
+        'horsepower': horsepower,
+        'engine_size': engine_size,
+        'fuel_consumption': fuel_consumption,
+        'age': age
+    }
     
     features = pd.DataFrame(data, index=[0])
     return features
 
+# Generate user input dataframe
 df = user_input_features()
-df.columns = df.columns.str.replace('_', ' ').str.title().str.strip()
 
+# Clean column names for display
+df_display = df.copy()
+df_display.columns = df_display.columns.str.replace('_', ' ').str.title().str.strip()
+
+# Load and display gif
 file_ = open("aladin.gif", "rb")
 contents = file_.read()
 data_url = base64.b64encode(contents).decode("utf-8")
@@ -62,23 +87,19 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown('###')
+st.markdown('---')
+st.markdown('### 🧐 Are you sure these are the features you want?')
+st.dataframe(df_display, use_container_width=True)
 
-st.markdown('## Are you sure these are the features?')
-st.dataframe(df.head(1), use_container_width=True)
-
+# Transform data
 encoded_df = encoder.transform(df)
 scaled_df = scaler.transform(encoded_df)
 prediction = model.predict(scaled_df)
 
-st.markdown('###')
+st.markdown('---')
+st.subheader('🔮 Now, mortal... click the magic button below!')
 
-st.subheader('Now, you mortal, click the button below!')
-
-if st.button('Me, me, me!'):
-    time.sleep(1)
-    st.write('### Hmmmmmm...')
-    time.sleep(3)
-    st.write('### Magic takes time...')
-    time.sleep(2)
-    st.success(f'## The price of your dream car is: €{round(prediction[0])}')
+if st.button('✨ Reveal the Price ✨'):
+    with st.spinner('Hmmmm... Magic takes time...'):
+        time.sleep(3)
+    st.success(f'💰 The price of your dream car is: **€{round(prediction[0]):,}**')
