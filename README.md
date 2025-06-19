@@ -1,2 +1,1 @@
-# price-prediction-app
-Application for Car Price Prediction Project
+Application Files for Car Price Prediction Project
