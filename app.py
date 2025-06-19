@@ -50,6 +50,7 @@ def user_input_features():
     return features
 
 df = user_input_features()
+df.columns = df.columns.str.replace('_', ' ').str.title().str.strip()
 
 file_ = open("aladin.gif", "rb")
 contents = file_.read()
@@ -64,7 +65,7 @@ st.markdown(
 st.markdown('###')
 
 st.markdown('## Are you sure these are the features?')
-st.table(df)
+st.dataframe(df.head(1), use_container_width=True)
 
 encoded_df = encoder.transform(df)
 scaled_df = scaler.transform(encoded_df)
