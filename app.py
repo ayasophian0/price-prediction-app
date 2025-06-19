@@ -12,7 +12,7 @@ model = pickle.load(open('xgb_final_model', 'rb'))
 
 # App title and intro
 st.write("""
-    # 🚗 Welcome to the Ultimate Car Price Predictor Machine! 🪄
+    # 🚗 Welcome to Aladin's Car Price Prediction Shop! 🪄
     
     Play with the widgets in the sidebar  
     and click the magic button below to reveal the price of your dream car!
